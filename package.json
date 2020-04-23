@@ -1,0 +1,33 @@
+{
+  "name": "server-base",
+  "version": "1.0.0",
+  "description": "REST API base con autenticacion",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mpaulq/node-server-base.git"
+  },
+  "author": "Martin Paul",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mpaulq/node-server-base/issues"
+  },
+  "homepage": "https://github.com/mpaulq/node-server-base#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.28",
+    "mongoose": "^5.9.10",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.3",
+    "swagger-ui-express": "^4.1.4",
+    "sync-request": "^6.1.0",
+    "uuid": "^7.0.3"
+  }
+}
