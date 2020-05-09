@@ -1,125 +1,50 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
+const multer = require('multer');
+const checkAuth = require('../middleware/check-auth');
+const UserController = require('../controllers/user.controller');
 
-const User = require('../models/user.model');
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, './public/');
+    },
+    filename: function(req, file, cb) {
+        cb(null, new Date().toISOString() + file.originalname);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+        cb(null, true)
+    } else {
+        cb(null, false);
+    }
+}
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1024 * 1024 * 5
+    },
+    fileFilter: fileFilter
+});
+
+// Registra un usuario
+router.post('/registrar', upload.single('userImg'), UserController.users_signup );
+
+// Login de usuario
+router.post('/login', UserController.users_login);
 
 // Retorna todos los usuarios
-router.get('/', (req, res, next) => {
-    User.find()
-    .exec()
-    .then(result => {
-        console.log(result);
-        if (result.length) {
-            res.status(200).json({retorno: result});
-        } else {
-            res.status(404).json({mensaje: 'No se encontraron usuarios'})
-        }
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err
-        });
-        console.log(err);
-    });
-});
+router.get('/', checkAuth, UserController.users_get_all);
 
 // Retorna un usuario por su id
-router.get('/:userId', (req, res, next) => {
-    const id = req.params.userId;
-    User.findOne(id)
-    .exec()
-    .then(result => {
-        console.log(result);
-        if (result) {
-            res.status(200).json({retorno: result});
-        } else {
-            res.status(404).json({
-                mensaje: 'No se encontraron usuarios'
-            })
-        }
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err
-        });
-        console.log(err);
-    });
-});
-
-// Insertar un usuario
-router.post('/', (req, res, next) => {
-    const user = new User({
-        _id: new mongoose.Types.ObjectId(),
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        password: req.body.password,
-        permissionLevel: req.body.permissionLevel
-    });
-    user.save().then(result => {
-        console.log(result);
-        res.status(200).json({
-            mensaje: 'Usuario creado exitosamente'
-        });
-    })
-    .catch(err => {
-        console.log(err);
-    })
-});
+router.get('/:userId', checkAuth, UserController.users_get_one);
 
 // Eliminar un usuario por su id
-router.delete('/:userId', (req, res, next) => {
-    const id = req.params.userId;
-    User.remove({_id: id})
-    .exec()
-    .then(result => {
-        console.log(result);
-        if (result.ok) {
-            res.status(200).json({
-                mensaje: 'Usuario eliminado exitosamente'
-            });
-        } else {
-            res.status(500).json({
-                mensaje: 'Operación terminada con errores'
-            })
-        }
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err
-        });
-        console.log(err);
-    });
-});
+router.delete('/:userId', checkAuth, UserController.users_delete);
 
 // Actualizar un usuario dado un id
-router.patch('/:userId', (req, res, next) => {
-    const id = req.params.userId;
-    const updateOps = {};
-    for(let [key, value] of Object.entries(req.body)) {
-        updateOps[key] = value;
-    }
-    User.update({_id: id}, {$set: updateOps})
-    .exec()
-    .then(result => {
-        console.log(result);
-        if (result.ok) {
-            res.status(200).json({
-                mensaje: 'Usuario actualizado exitosamente'
-            });
-        } else {
-            res.status(500).json({
-                mensaje: 'Operación terminada con errores'
-            })
-        }
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err
-        });
-        console.log(err);
-    });
-});
+router.patch('/:userId', checkAuth, upload.single('userImg'), UserController.users_edit);
 
 module.exports = router;

@@ -6,12 +6,14 @@ const mongoose = require('mongoose');
 
 const userRoutes = require('./api/routes/users')
 
-mongoose.connect('mongodb://127.0.0.1:27017/node-base', {
+mongoose.connect(`mongodb://127.0.0.1:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useCreateIndex: true
 });
 
 app.use(morgan('dev'));
+app.use('/public' ,express.static('public'))
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
